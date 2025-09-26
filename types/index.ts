@@ -1,0 +1,510 @@
+/**
+ * Archivo central para todos los tipos TypeScript de la aplicación
+ * Aquí definimos las interfaces y tipos que se usarán en toda la app
+ */
+
+// ==========================================
+// TIPOS BÁSICOS DE LA APLICACIÓN
+// ==========================================
+
+/**
+ * Tipo para identificadores únicos
+ */
+export type ID = number;
+
+/**
+ * Carreras disponibles en el sistema
+ */
+export type Carrera = "ISC" | "IGE" | "IIA" | "ITICS";
+
+// ==========================================
+// INTERFACES DE ENTIDADES PRINCIPALES
+// ==========================================
+
+/**
+ * Interfaz base para entidades que tienen ID
+ */
+export interface BaseEntity {
+  id: ID;
+}
+
+/**
+ * Interfaz para un Alumno - ACTUALIZADA para compatibilidad con el CRUD
+ */
+export interface Alumno extends BaseEntity {
+  id: number;
+  nombre: string;
+  sem?: string; // Semestre (ej: "7A", "8B")
+  carrera?: Carrera;
+  email?: string;
+  telefono?: string;
+  // Campos adicionales para el formulario completo
+  fechaNacimiento?: string; // Formato DD/MM/YYYY
+  direccion?: string;
+  numeroControl?: string; // Número de control único
+  fechaIngreso?: string;
+  estatus?: "Activo" | "Inactivo" | "Egresado" | "Baja temporal";
+  promedio?: number;
+  creditosAcumulados?: number;
+  observaciones?: string;
+  fotoPerfil?: string;
+}
+
+/**
+ * Interfaz para un Profesor
+ */
+export interface Profesor extends BaseEntity {
+  nombre: string;
+  carrera: Carrera;
+  email?: string;
+  telefono?: string;
+  especialidad?: string;
+  gradoAcademico?: "Licenciatura" | "Maestría" | "Doctorado";
+  estatus?: "Activo" | "Inactivo" | "Licencia";
+  fechaIngreso?: string;
+  numeroEmpleado?: string;
+  departamento?: string;
+  materiasImpartidas?: ID[];
+  gruposAsignados?: ID[];
+}
+
+/**
+ * Interfaz para una Materia
+ */
+export interface Materia extends BaseEntity {
+  nombre: string;
+  carrera: Carrera;
+  creditos?: number;
+  semestre?: number;
+  descripcion?: string;
+  prerrequisitos?: string[];
+  modalidad?: "Presencial" | "Virtual" | "Híbrida";
+  estado?: "Activa" | "Inactiva" | "En Desarrollo";
+  profesorId?: ID;
+  horasTeoricas?: number;
+  horasPracticas?: number;
+}
+
+/**
+ * Interfaz para un Grupo
+ */
+export interface Grupo extends BaseEntity {
+  nombre: string;
+  carrera: Carrera;
+  profesorId?: ID;
+  materiaId?: ID;
+  semestre?: number;
+  capacidadMaxima?: number;
+  estudiantesInscritos?: ID[];
+  horario?: string;
+  estatus?: "Activo" | "Inactivo" | "Finalizado";
+  periodo?: string;
+  aula?: string;
+}
+
+/**
+ * Interfaz para horarios de clase
+ */
+export interface HorarioClase {
+  id: ID;
+  dia: "Lunes" | "Martes" | "Miércoles" | "Jueves" | "Viernes" | "Sábado";
+  horaInicio: string;
+  horaFin: string;
+  materiaId: ID;
+  profesorId: ID;
+  grupoId: ID;
+  aula: string;
+}
+
+// ==========================================
+// TIPOS PARA COMPONENTES UI
+// ==========================================
+
+/**
+ * Props para componentes de Card/Tarjeta
+ */
+export interface CardProps {
+  titulo: string;
+  subtitulo?: string;
+  onPress?: () => void;
+  icono?: string;
+  imagen?: any; // Para require() de imágenes
+}
+
+/**
+ * Props para componentes de Modal
+ */
+export interface ModalProps {
+  visible: boolean;
+  onClose: () => void;
+  titulo?: string;
+  children?: React.ReactNode;
+}
+
+/**
+ * Props para componentes de Lista
+ */
+export interface ListItemProps<T> {
+  item: T;
+  onPress?: (item: T) => void;
+  onEdit?: (item: T) => void;
+  onDelete?: (item: T) => void;
+}
+
+// ==========================================
+// TIPOS PARA FORMULARIOS
+// ==========================================
+
+/**
+ * Datos del formulario de Login
+ */
+export interface LoginFormData {
+  username: string;
+  password: string;
+}
+
+/**
+ * Datos del formulario de Alumno - ACTUALIZADO para el modal
+ */
+export interface AlumnoFormData {
+  nombre: string;
+  sem: string;
+  carrera: Carrera;
+  email: string;
+  telefono: string;
+  fechaNacimiento?: string;
+  direccion?: string;
+  numeroControl?: string;
+}
+
+/**
+ * Datos del formulario de Profesor
+ */
+export interface ProfesorFormData {
+  nombre: string;
+  carrera: Carrera;
+  email?: string;
+  telefono?: string;
+  especialidad?: string;
+}
+
+// ==========================================
+// TIPOS PARA GESTIÓN DE ESTADOS
+// ==========================================
+
+/**
+ * Estados de carga para operaciones asíncronas
+ */
+export type LoadingState = "idle" | "loading" | "success" | "error";
+
+/**
+ * Estructura para manejo de errores
+ */
+export interface ErrorState {
+  hasError: boolean;
+  message?: string;
+  code?: string;
+}
+
+/**
+ * Estado general de una pantalla con datos
+ */
+export interface ScreenState<T> {
+  data: T[];
+  loading: LoadingState;
+  error: ErrorState;
+}
+
+// ==========================================
+// TIPOS PARA NAVEGACIÓN (Complementarios)
+// ==========================================
+
+/**
+ * Props que reciben las pantallas de navegación
+ */
+export interface ScreenProps<T = any> {
+  navigation: any; // Tipo básico, se puede mejorar después
+  route: {
+    params?: T;
+  };
+}
+
+/**
+ * Parámetros específicos para pantallas de detalle
+ */
+export interface DetailScreenParams {
+  id: ID;
+  nombre: string;
+}
+
+// ==========================================
+// TIPOS UTILITARIOS
+// ==========================================
+
+/**
+ * Hace todas las propiedades opcionales excepto el ID
+ */
+export type PartialExceptId<T extends BaseEntity> = {
+  id: ID;
+} & Partial<Omit<T, "id">>;
+
+/**
+ * Omite el ID para crear nuevos elementos
+ */
+export type CreateEntity<T extends BaseEntity> = Omit<T, "id">;
+
+/**
+ * Para operaciones CRUD
+ */
+export type CRUDOperation = "create" | "read" | "update" | "delete";
+
+/**
+ * Tipos para diferentes modos de formulario
+ */
+export type FormMode = "create" | "edit" | "view";
+
+// ==========================================
+// TIPOS PARA VALIDACIÓN
+// ==========================================
+
+/**
+ * Reglas de validación para formularios
+ */
+export interface ValidationRule {
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp;
+  custom?: (value: string) => boolean;
+  message: string;
+}
+
+export interface ValidationRules {
+  [fieldName: string]: ValidationRule[];
+}
+
+/**
+ * Resultado de validación
+ */
+export interface ValidationResult {
+  isValid: boolean;
+  errors: { [fieldName: string]: string };
+}
+
+// ==========================================
+// TIPOS PARA FILTROS Y BÚSQUEDA
+// ==========================================
+
+/**
+ * Filtros de búsqueda para alumnos
+ */
+export interface SearchFilters {
+  text?: string;
+  carrera?: Carrera | "Todas";
+  semestre?: string;
+  estatus?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+}
+
+/**
+ * Opciones de ordenamiento
+ */
+export interface SortOption {
+  field: string;
+  direction: "asc" | "desc";
+  label: string;
+}
+
+/**
+ * Estado de paginación
+ */
+export interface PaginationState {
+  page: number;
+  pageSize: number;
+  total: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+// ==========================================
+// TIPOS PARA API
+// ==========================================
+
+/**
+ * Respuesta estándar de API
+ */
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  errors?: string[];
+  pagination?: PaginationState;
+}
+
+// ==========================================
+// TIPOS ADICIONALES PARA EL SISTEMA
+// ==========================================
+
+/**
+ * Configuración de notificaciones
+ */
+export interface NotificationSettings {
+  enabled: boolean;
+  types: {
+    asistencias: boolean;
+    calificaciones: boolean;
+    avisos: boolean;
+    eventos: boolean;
+  };
+}
+
+/**
+ * Perfil de usuario
+ */
+export interface UserProfile {
+  id: ID;
+  username: string;
+  nombre: string;
+  email: string;
+  rol: "Administrador" | "Profesor" | "Alumno";
+  avatar?: string;
+  ultimoAcceso?: string;
+  configuraciones: NotificationSettings;
+}
+
+// ==========================================
+// TIPOS DE UTILIDAD AVANZADOS
+// ==========================================
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
+
+// ==========================================
+// CONSTANTES DE TIPO
+// ==========================================
+
+/**
+ * Colores principales de la aplicación - ACTUALIZADOS
+ */
+export const COLORS = {
+  primary: "#6200ea",
+  primaryDark: "#4527a0",
+  secondary: "#03dac6",
+  background: "#f5f5f5",
+  surface: "#ffffff",
+  error: "#b00020",
+  success: "#4caf50",
+  warning: "#ff9800",
+  info: "#2196f3",
+  text: "#212121",
+  textSecondary: "#757575",
+  textDisabled: "#bdbdbd",
+  onPrimary: "#ffffff",
+  onSecondary: "#000000",
+  onBackground: "#000000",
+  onSurface: "#000000",
+  onError: "#ffffff",
+  divider: "#e0e0e0",
+  overlay: "rgba(0, 0, 0, 0.5)",
+  shadow: "#000000",
+
+  // Colores por carrera
+  carreras: {
+    ISC: "#2196f3",
+    IGE: "#4caf50",
+    IIA: "#ff9800",
+    ITICS: "#9c27b0",
+  },
+};
+
+/**
+ * Tamaños de fuente estándar
+ */
+export const FONT_SIZES = {
+  tiny: 10,
+  small: 12,
+  medium: 14,
+  large: 18,
+  xlarge: 24,
+  xxlarge: 32,
+};
+
+/**
+ * Espaciados estándar
+ */
+export const SPACING = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+};
+
+/**
+ * Tiempos de animación
+ */
+export const ANIMATION = {
+  fast: 200,
+  normal: 300,
+  slow: 500,
+};
+
+/**
+ * Dimensiones comunes
+ */
+export const DIMENSIONS = {
+  buttonHeight: 48,
+  inputHeight: 48,
+  headerHeight: 56,
+  borderRadius: 8,
+  iconSize: 24,
+};
+
+/**
+ * Configuración de la aplicación
+ */
+export const APP_CONFIG = {
+  name: "Sistema Escolar",
+  version: "1.0.0",
+  defaultPageSize: 20,
+  maxUploadSize: 10 * 1024 * 1024, // 10MB
+  supportedImageFormats: ["jpg", "jpeg", "png", "gif"],
+  supportedDocumentFormats: ["pdf", "doc", "docx", "xls", "xlsx"],
+  dateFormat: "DD/MM/YYYY",
+  timeFormat: "HH:mm",
+  currency: "MXN",
+  defaultLanguage: "es",
+} as const;
+
+/**
+ * Validaciones comunes
+ */
+export const VALIDATIONS = {
+  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  phone: /^\+?[\d\s\-\(\)]+$/,
+  numbersOnly: /^\d+$/,
+  lettersOnly: /^[a-zA-ZÁ-ÿ\u00f1\u00d1\s]+$/,
+  controlNumber: /^\d{8}$/,
+} as const;
+
+/**
+ * Mensajes del sistema
+ */
+export const MESSAGES = {
+  loading: "Cargando...",
+  error: "Ha ocurrido un error",
+  success: "Operación exitosa",
+  confirmation: "¿Estás seguro?",
+  noData: "No hay datos disponibles",
+  saved: "Guardado exitosamente",
+  deleted: "Eliminado exitosamente",
+  updated: "Actualizado exitosamente",
+  created: "Creado exitosamente",
+} as const;
