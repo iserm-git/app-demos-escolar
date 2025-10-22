@@ -7,6 +7,7 @@ import HomeScreen from "../screens/home/HomeScreen";
 import AlumnoScreen from "../screens/alumnos/AlumnoScreen";
 import AlumnoDetailScreen from "../screens/alumnos/AlumnoDetailScreen";
 import ProfesorScreen from "../screens/profesores/ProfesorScreen";
+import ProfesorDetailScreen from "../screens/profesores/ProfesorDetailScreen";
 import GrupoScreen from "../screens/grupos/GrupoScreen";
 import GrupoDetailScreen from "../screens/grupos/GrupoDetailScreen";
 import MateriaScreen from "../screens/materias/MateriaScreen";
@@ -103,6 +104,11 @@ const StackNavigator: React.FC = () => {
         component={ProfesorScreen}
         options={{ title: "Lista de Profesores" }}
       />
+      <Stack.Screen
+        name="ProfesorDetails"
+        component={ProfesorDetailScreen}
+        options={{ title: "Detalle del Profesor" }}
+      />
 
       {/* Pantallas de Materias */}
       <Stack.Screen
@@ -110,7 +116,6 @@ const StackNavigator: React.FC = () => {
         component={MateriaScreen}
         options={{ title: "Lista de Materias" }}
       />
-
       <Stack.Screen
         name="MateriaDetails"
         component={MateriaDetailScreen}

@@ -51,7 +51,7 @@ export interface Alumno extends BaseEntity {
 }
 
 /**
- * Interfaz para un Profesor
+ * Interfaz para un Profesor - ACTUALIZADA para CRUD completo
  */
 export interface Profesor extends BaseEntity {
   nombre: string;
@@ -66,6 +66,17 @@ export interface Profesor extends BaseEntity {
   departamento?: string;
   materiasImpartidas?: ID[];
   gruposAsignados?: ID[];
+  // Campos adicionales para información académica
+  experienciaAnios?: number;
+  publicaciones?: number;
+  evaluacionPromedio?: number;
+  cedula?: string;
+  curp?: string;
+  rfc?: string;
+  direccion?: string;
+  fechaNacimiento?: string;
+  nacionalidad?: string;
+  estadoCivil?: "Soltero" | "Casado" | "Divorciado" | "Viudo" | "Unión libre";
 }
 
 /**
@@ -178,14 +189,27 @@ export interface AlumnoFormData {
 }
 
 /**
- * Datos del formulario de Profesor
+ * Datos del formulario de Profesor - ACTUALIZADO para CRUD completo
  */
 export interface ProfesorFormData {
   nombre: string;
   carrera: Carrera;
-  email?: string;
-  telefono?: string;
-  especialidad?: string;
+  email: string;
+  telefono: string;
+  especialidad: string;
+  gradoAcademico: "Licenciatura" | "Maestría" | "Doctorado";
+  numeroEmpleado?: string;
+  departamento?: string;
+  fechaIngreso?: string;
+  estatus: "Activo" | "Inactivo" | "Licencia";
+  // Campos adicionales opcionales
+  cedula?: string;
+  curp?: string;
+  rfc?: string;
+  direccion?: string;
+  fechaNacimiento?: string;
+  nacionalidad?: string;
+  estadoCivil?: "Soltero" | "Casado" | "Divorciado" | "Viudo" | "Unión libre";
 }
 
 // ==========================================
@@ -298,6 +322,31 @@ export interface ValidationResult {
 /**
  * Filtros de búsqueda para alumnos
  */
+export interface AlumnoSearchFilters {
+  text?: string;
+  carrera?: Carrera | "Todas";
+  semestre?: string;
+  estatus?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+}
+
+/**
+ * Filtros de búsqueda para profesores - NUEVO
+ */
+export interface ProfesorSearchFilters {
+  text?: string;
+  carrera?: Carrera | "Todas";
+  especialidad?: string;
+  gradoAcademico?: "Licenciatura" | "Maestría" | "Doctorado" | "Todos";
+  estatus?: "Activo" | "Inactivo" | "Licencia" | "Todos";
+  departamento?: string;
+  experienciaMinima?: number;
+}
+
+/**
+ * Filtros generales del sistema
+ */
 export interface SearchFilters {
   text?: string;
   carrera?: Carrera | "Todas";
@@ -342,6 +391,15 @@ export interface ApiResponse<T> {
   pagination?: PaginationState;
 }
 
+/**
+ * Respuesta de API para operaciones CRUD
+ */
+export interface CRUDApiResponse<T> extends ApiResponse<T> {
+  operation: CRUDOperation;
+  timestamp: string;
+  affectedRows?: number;
+}
+
 // ==========================================
 // TIPOS ADICIONALES PARA EL SISTEMA
 // ==========================================
@@ -371,6 +429,33 @@ export interface UserProfile {
   avatar?: string;
   ultimoAcceso?: string;
   configuraciones: NotificationSettings;
+}
+
+/**
+ * Información académica detallada para profesores - NUEVO
+ */
+export interface ProfesorAcademicInfo {
+  materiasImpartidas: Materia[];
+  gruposAsignados: Grupo[];
+  estudiantesTotales: number;
+  experienciaAnios: number;
+  promedioEvaluacion: number;
+  publicaciones: number;
+  certificaciones?: string[];
+  proyectosInvestigacion?: string[];
+}
+
+/**
+ * Información académica detallada para alumnos
+ */
+export interface AlumnoAcademicInfo {
+  promedio: number;
+  creditos: number;
+  materiasAprobadas: number;
+  materiasEnCurso: number;
+  semestreActual: string;
+  materiasPendientes?: string[];
+  historialAcademico?: any[];
 }
 
 // ==========================================
@@ -420,6 +505,20 @@ export const COLORS = {
     IGE: "#4caf50",
     IIA: "#ff9800",
     ITICS: "#9c27b0",
+  },
+
+  // Colores por estatus de profesores - NUEVO
+  estatusProfesores: {
+    Activo: "#4caf50",
+    Inactivo: "#f44336",
+    Licencia: "#ff9800",
+  },
+
+  // Colores por grado académico - NUEVO
+  gradosAcademicos: {
+    Licenciatura: "#2196f3",
+    Maestría: "#ff9800",
+    Doctorado: "#9c27b0",
   },
 };
 
@@ -484,18 +583,22 @@ export const APP_CONFIG = {
 } as const;
 
 /**
- * Validaciones comunes
+ * Validaciones comunes - ACTUALIZADAS
  */
 export const VALIDATIONS = {
   email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   phone: /^\+?[\d\s\-\(\)]+$/,
   numbersOnly: /^\d+$/,
-  lettersOnly: /^[a-zA-ZÁ-ÿ\u00f1\u00d1\s]+$/,
+  lettersOnly: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/,
   controlNumber: /^\d{8}$/,
+  empleadoNumber: /^\d{4,8}$/, // NUEVO: Validación para número de empleado
+  curp: /^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$/, // NUEVO: Validación para CURP
+  rfc: /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/, // NUEVO: Validación para RFC
+  cedula: /^\d{7,8}$/, // NUEVO: Validación para cédula profesional
 } as const;
 
 /**
- * Mensajes del sistema
+ * Mensajes del sistema - ACTUALIZADOS
  */
 export const MESSAGES = {
   loading: "Cargando...",
@@ -507,4 +610,44 @@ export const MESSAGES = {
   deleted: "Eliminado exitosamente",
   updated: "Actualizado exitosamente",
   created: "Creado exitosamente",
+
+  // Mensajes específicos para profesores - NUEVO
+  profesores: {
+    created: "Profesor creado exitosamente",
+    updated: "Información del profesor actualizada",
+    deleted: "Profesor eliminado del sistema",
+    notFound: "Profesor no encontrado",
+    loadingError: "Error al cargar información del profesor",
+  },
+
+  // Mensajes de validación - NUEVO
+  validation: {
+    required: "Este campo es requerido",
+    email: "Formato de email inválido",
+    phone: "Formato de teléfono inválido",
+    minLength: "Debe tener al menos {min} caracteres",
+    maxLength: "No puede exceder {max} caracteres",
+    invalidFormat: "Formato inválido",
+  },
+} as const;
+
+/**
+ * Configuraciones específicas para módulos - NUEVO
+ */
+export const MODULE_CONFIG = {
+  profesores: {
+    maxProfesoresPorDepartamento: 50,
+    maxMateriasPersona: 6,
+    maxGruposPersona: 4,
+    experienciaMinima: 0,
+    experienciaMaxima: 50,
+    evaluacionMinima: 1.0,
+    evaluacionMaxima: 5.0,
+  },
+  alumnos: {
+    maxAlumnosPorGrupo: 40,
+    maxMateriasSimultaneas: 8,
+    promedioMinimo: 6.0,
+    creditosMaximosSemestre: 30,
+  },
 } as const;
