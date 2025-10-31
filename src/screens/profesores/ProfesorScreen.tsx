@@ -15,6 +15,8 @@ import {
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 
+import { CallButton } from "../../components/phone/CallButton";
+
 // Importamos los tipos
 import { RootStackParamList } from "../../navigation/StackNavigator";
 import {
@@ -115,7 +117,14 @@ const ProfesorItem: React.FC<ProfesorItemProps> = ({
 
   return (
     <Animated.View style={[styles.profesorCard, { opacity: fadeAnim }]}>
-      <Image source={profesorImage} style={styles.profesorImage} />
+      {/* <Image source={profesorImage} style={styles.profesorImage} /> */}
+      {/* Renderizado condicional de imagen */}
+      <Image
+        source={
+          profesor.fotoPerfil ? { uri: profesor.fotoPerfil } : profesorImage
+        }
+        style={styles.profesorImage}
+      />
       <View style={styles.profesorInfo}>
         <View style={styles.profesorHeader}>
           <Text style={styles.profesorNombre} numberOfLines={2}>
@@ -165,12 +174,21 @@ const ProfesorItem: React.FC<ProfesorItemProps> = ({
 
         {/* Botones de acción */}
         <View style={styles.buttonContainer}>
+          {/* ✅ NUEVO: Botón de llamada si tiene teléfono */}
+          {profesor.telefono && (
+            <CallButton
+              phoneNumber={profesor.telefono}
+              compact={true}
+              showPrompt={true}
+            />
+          )}
+
           <TouchableOpacity
             style={styles.detailButton}
             onPress={() => onPress(profesor)}
             activeOpacity={0.7}
           >
-            <MaterialIcons name="visibility" size={14} color={COLORS.surface} />
+            <MaterialIcons name="visibility" size={16} color={COLORS.surface} />
             <Text style={styles.buttonText}>Ver</Text>
           </TouchableOpacity>
 
@@ -179,16 +197,8 @@ const ProfesorItem: React.FC<ProfesorItemProps> = ({
             onPress={() => onEdit(profesor)}
             activeOpacity={0.7}
           >
-            <MaterialIcons name="edit" size={14} color={COLORS.surface} />
+            <MaterialIcons name="edit" size={16} color={COLORS.surface} />
             <Text style={styles.buttonText}>Editar</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={() => onShowModal(profesor)}
-            activeOpacity={0.7}
-          >
-            <MaterialIcons name="info" size={14} color={COLORS.primary} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -196,7 +206,7 @@ const ProfesorItem: React.FC<ProfesorItemProps> = ({
             onPress={handleDelete}
             activeOpacity={0.7}
           >
-            <MaterialIcons name="delete" size={14} color={COLORS.surface} />
+            <MaterialIcons name="delete" size={16} color={COLORS.surface} />
           </TouchableOpacity>
         </View>
       </View>

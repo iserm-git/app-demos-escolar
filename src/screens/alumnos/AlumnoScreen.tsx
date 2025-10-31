@@ -29,6 +29,8 @@ import {
 import ModalAlumno from "../../utils/ModalAlumno";
 import AlumnoFormModal from "../../utils/AlumnoFormModal";
 
+import { CallButton } from "../../components/phone/CallButton";
+
 // Imagen por defecto para alumnos
 const alumnoImage = require("../../../assets/alumno_image1.png");
 
@@ -99,7 +101,11 @@ const AlumnoItem: React.FC<AlumnoItemProps> = ({
 
   return (
     <Animated.View style={[styles.alumnoCard, { opacity: fadeAnim }]}>
-      <Image source={alumnoImage} style={styles.alumnoImage} />
+      {/* <Image source={alumnoImage} style={styles.alumnoImage} /> */}
+      <Image
+        source={alumno.fotoPerfil ? { uri: alumno.fotoPerfil } : alumnoImage}
+        style={styles.alumnoImage}
+      />
       <View style={styles.alumnoInfo}>
         <Text style={styles.alumnoNombre} numberOfLines={2}>
           {alumno.nombre}
@@ -121,6 +127,15 @@ const AlumnoItem: React.FC<AlumnoItemProps> = ({
 
         {/* Botones de acción */}
         <View style={styles.buttonContainer}>
+          {/* ✅ NUEVO: Botón de llamada si tiene teléfono */}
+          {alumno.telefono && (
+            <CallButton
+              phoneNumber={alumno.telefono}
+              compact={true}
+              showPrompt={true}
+            />
+          )}
+
           <TouchableOpacity
             style={styles.detailButton}
             onPress={() => onPress(alumno)}
@@ -136,7 +151,7 @@ const AlumnoItem: React.FC<AlumnoItemProps> = ({
             activeOpacity={0.7}
           >
             <MaterialIcons name="edit" size={14} color={COLORS.surface} />
-            <Text style={styles.buttonText}>Editar</Text>
+            <Text style={styles.buttonText}>Edit</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

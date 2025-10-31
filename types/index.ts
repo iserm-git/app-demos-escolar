@@ -48,6 +48,7 @@ export interface Alumno extends BaseEntity {
   creditosAcumulados?: number;
   observaciones?: string;
   fotoPerfil?: string;
+  fotoPerfilThumb?: string;
 }
 
 /**
@@ -77,6 +78,8 @@ export interface Profesor extends BaseEntity {
   fechaNacimiento?: string;
   nacionalidad?: string;
   estadoCivil?: "Soltero" | "Casado" | "Divorciado" | "Viudo" | "Unión libre";
+  fotoPerfil?: string;
+  fotoPerfilThumb?: string;
 }
 
 /**
@@ -459,6 +462,67 @@ export interface AlumnoAcademicInfo {
 }
 
 // ==========================================
+// INTERFACES PARA LLAMADAS TELEFÓNICAS (NUEVAS)
+// ==========================================
+
+/**
+ * Información de contacto para llamadas
+ */
+export interface ContactInfo {
+  phone: string;
+  email?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  relationship?: string;
+}
+
+/**
+ * Tipo de llamada telefónica
+ */
+export type CallType = "direct" | "prompt";
+
+/**
+ * Opciones para realizar llamada
+ */
+export interface CallOptions {
+  phoneNumber: string;
+  type?: CallType;
+  prompt?: boolean;
+}
+
+/**
+ * Resultado de intento de llamada
+ */
+export interface CallResult {
+  success: boolean;
+  error?: string;
+  phoneNumber: string;
+}
+
+/**
+ * Estados de llamada
+ */
+export enum CallStatus {
+  IDLE = "idle",
+  DIALING = "dialing",
+  CONNECTED = "connected",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
+}
+
+/**
+ * Formato de número telefónico
+ */
+export interface PhoneNumber {
+  raw: string;
+  formatted: string;
+  dialable: string;
+  countryCode?: string;
+  areaCode?: string;
+  localNumber?: string;
+}
+
+// ==========================================
 // TIPOS DE UTILIDAD AVANZADOS
 // ==========================================
 
@@ -651,3 +715,40 @@ export const MODULE_CONFIG = {
     creditosMaximosSemestre: 30,
   },
 } as const;
+
+// ==========================================
+// INTERFACES PARA IMÁGENES
+// ==========================================
+
+export interface ImagePickerOptions {
+  mediaTypes: "Images" | "Videos" | "All";
+  allowsEditing: boolean;
+  aspect?: [number, number];
+  quality: number;
+  base64?: boolean;
+}
+
+export interface ImagePickerResult {
+  success: boolean;
+  uri?: string;
+  base64?: string;
+  width?: number;
+  height?: number;
+  fileSize?: number;
+  cancelled?: boolean;
+  error?: string;
+}
+
+export interface ImageInfo {
+  uri: string;
+  width: number;
+  height: number;
+  format: "jpeg" | "png" | "gif" | "webp";
+  fileSize: number;
+}
+
+export interface ImageManipulation {
+  resize?: { width: number; height: number };
+  compress?: number;
+  format?: "jpeg" | "png";
+}

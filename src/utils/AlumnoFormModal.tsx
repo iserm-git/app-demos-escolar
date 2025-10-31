@@ -13,10 +13,8 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Alumno, COLORS, FONT_SIZES } from "../../types";
+import { ProfileImagePicker } from "../components/camera/ProfileImagePicker";
 
-/**
- * Props para el modal de formulario de alumno
- */
 interface AlumnoFormModalProps {
   visible: boolean;
   onClose: () => void;
@@ -25,9 +23,6 @@ interface AlumnoFormModalProps {
   mode: "create" | "edit";
 }
 
-/**
- * Datos del formulario
- */
 interface FormData {
   nombre: string;
   sem: string;
@@ -37,11 +32,9 @@ interface FormData {
   fechaNacimiento: string;
   direccion: string;
   numeroControl: string;
+  fotoPerfil: string; //
 }
 
-/**
- * Modal para crear o editar un alumno
- */
 const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
   visible,
   onClose,
@@ -58,13 +51,13 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
     fechaNacimiento: "",
     direccion: "",
     numeroControl: "",
+    fotoPerfil: "",
   };
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Opciones para los select
   const semestres = [
     "1A",
     "1B",
@@ -93,15 +86,9 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
     { value: "ITICS", label: "Ingeniería en TIC's" },
   ];
 
-  /**
-   * Estados para los selectores
-   */
   const [showCarreraSelector, setShowCarreraSelector] = useState(false);
   const [showSemestreSelector, setShowSemestreSelector] = useState(false);
 
-  /**
-   * Efecto para llenar el formulario cuando se edita
-   */
   useEffect(() => {
     if (mode === "edit" && alumno) {
       setFormData({
@@ -113,6 +100,7 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
         fechaNacimiento: alumno.fechaNacimiento || "",
         direccion: alumno.direccion || "",
         numeroControl: alumno.numeroControl || "",
+        fotoPerfil: alumno.fotoPerfil || "",
       });
     } else {
       setFormData(initialFormData);
@@ -120,15 +108,25 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
     setErrors({});
   }, [visible, mode, alumno]);
 
-  /**
-   * Actualiza un campo del formulario
-   */
+  const handleImageSelected = (uri: string): void => {
+    setFormData((prev) => ({
+      ...prev,
+      fotoPerfil: uri,
+    }));
+  };
+
+  const handleImageRemoved = (): void => {
+    setFormData((prev) => ({
+      ...prev,
+      fotoPerfil: "",
+    }));
+  };
+
   const updateField = (field: keyof FormData, value: string): void => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
-
     if (errors[field]) {
       setErrors((prev) => ({
         ...prev,
@@ -137,9 +135,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
     }
   };
 
-  /**
-   * Valida el formulario
-   */
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
 
@@ -174,9 +169,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  /**
-   * Maneja el envío del formulario
-   */
   const handleSubmit = async (): Promise<void> => {
     if (!validateForm()) {
       Alert.alert("Error", "Por favor, corrige los errores en el formulario.");
@@ -184,7 +176,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
     }
 
     setIsSubmitting(true);
-
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -194,6 +185,7 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
         carrera: formData.carrera as any,
         email: formData.email.trim().toLowerCase(),
         telefono: formData.telefono.trim(),
+        fotoPerfil: formData.fotoPerfil,
       };
 
       if (formData.direccion.trim()) {
@@ -219,9 +211,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
     }
   };
 
-  /**
-   * Cierra el modal
-   */
   const handleClose = (): void => {
     if (!isSubmitting) {
       setFormData(initialFormData);
@@ -230,12 +219,8 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
     }
   };
 
-  /**
-   * Formatea el número de teléfono
-   */
   const formatPhoneNumber = (text: string): string => {
     const cleaned = text.replace(/[^\d+]/g, "").replace(/\+(?!^)/g, "");
-
     if (cleaned.startsWith("+52")) {
       const numbers = cleaned.substring(3);
       if (numbers.length <= 3) return `+52 ${numbers}`;
@@ -246,7 +231,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
         6
       )} ${numbers.substring(6, 10)}`;
     }
-
     if (cleaned.length <= 3) return cleaned;
     if (cleaned.length <= 6)
       return `${cleaned.substring(0, 3)} ${cleaned.substring(3)}`;
@@ -255,13 +239,9 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
         3,
         6
       )} ${cleaned.substring(6)}`;
-
     return cleaned.substring(0, 15);
   };
 
-  /**
-   * Renderiza un campo de texto
-   */
   const renderTextInput = (
     field: keyof FormData,
     label: string,
@@ -314,9 +294,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
     </View>
   );
 
-  /**
-   * Renderiza selector de carrera
-   */
   const renderCarreraSelector = (): JSX.Element => (
     <View style={styles.inputGroup}>
       <Text style={styles.label}>
@@ -337,7 +314,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
           color={COLORS.textSecondary}
         />
       </TouchableOpacity>
-
       <Modal
         visible={showCarreraSelector}
         transparent
@@ -378,9 +354,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
     </View>
   );
 
-  /**
-   * Renderiza selector de semestre
-   */
   const renderSemestreSelector = (): JSX.Element => (
     <View style={styles.inputGroup}>
       <Text style={styles.label}>
@@ -398,7 +371,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
           color={COLORS.textSecondary}
         />
       </TouchableOpacity>
-
       <Modal
         visible={showSemestreSelector}
         transparent
@@ -447,7 +419,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             onPress={handleClose}
@@ -460,7 +431,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
               color={isSubmitting ? COLORS.textSecondary : COLORS.text}
             />
           </TouchableOpacity>
-
           <View style={styles.headerTitleContainer}>
             <Text style={styles.headerTitle}>
               {mode === "create" ? "Nuevo Alumno" : "Editar Alumno"}
@@ -469,7 +439,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
               <Text style={styles.headerSubtitle}>{alumno.nombre}</Text>
             )}
           </View>
-
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={isSubmitting}
@@ -494,16 +463,27 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
           </TouchableOpacity>
         </View>
 
-        {/* Formulario */}
         <ScrollView
           style={styles.form}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.formContent}>
+            {/* SECCIÓN: Foto de Perfil */}
+            <View style={styles.photoSection}>
+              <Text style={styles.sectionTitle}>📷 Foto de Perfil</Text>
+              <ProfileImagePicker
+                currentImage={formData.fotoPerfil}
+                onImageSelected={handleImageSelected}
+                onImageRemoved={handleImageRemoved}
+                size={120}
+                shape="circle"
+                editable={!isSubmitting}
+              />
+            </View>
+
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>📝 Información Personal</Text>
-
               {renderTextInput(
                 "nombre",
                 "Nombre completo",
@@ -513,7 +493,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
                   maxLength: 100,
                 }
               )}
-
               {renderTextInput(
                 "email",
                 "Correo electrónico",
@@ -524,12 +503,10 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
                   maxLength: 100,
                 }
               )}
-
               {renderTextInput("telefono", "Teléfono", "+52 443 123 4567", {
                 keyboardType: "phone-pad",
                 maxLength: 20,
               })}
-
               {renderTextInput(
                 "fechaNacimiento",
                 "Fecha de Nacimiento",
@@ -538,7 +515,6 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
                   maxLength: 10,
                 }
               )}
-
               {renderTextInput(
                 "direccion",
                 "Dirección",
@@ -553,10 +529,8 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>🎓 Información Académica</Text>
-
               {renderCarreraSelector()}
               {renderSemestreSelector()}
-
               {mode === "create" &&
                 renderTextInput(
                   "numeroControl",
@@ -576,8 +550,8 @@ const AlumnoFormModal: React.FC<AlumnoFormModalProps> = ({
                 <Text style={styles.infoTitle}>Información Importante</Text>
                 <Text style={styles.infoText}>
                   {mode === "create"
-                    ? "• Los campos marcados con (*) son obligatorios\n• El número de control debe ser único\n• Verifica que el email sea correcto"
-                    : "• Los campos marcados con (*) son obligatorios\n• Puedes modificar la información del estudiante\n• Los cambios se guardarán inmediatamente"}
+                    ? "• Los campos marcados con (*) son obligatorios\n• El número de control debe ser único\n• Verifica que el email sea correcto\n• La foto de perfil es opcional"
+                    : "• Los campos marcados con (*) son obligatorios\n• Puedes modificar la información del estudiante\n• Los cambios se guardarán inmediatamente\n• Puedes actualizar la foto de perfil"}
                 </Text>
               </View>
             </View>
@@ -655,6 +629,18 @@ const styles = StyleSheet.create({
   formContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
+  },
+  photoSection: {
+    alignItems: "center",
+    marginBottom: 30,
+    paddingVertical: 20,
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    elevation: 1,
+    shadowColor: COLORS.text,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   section: {
     marginBottom: 30,
